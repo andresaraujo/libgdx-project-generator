@@ -14,7 +14,7 @@ buildscript {
 import templates.*
 
 /**
-* Creates the basic Java project directory structure.
+* Creates the Core Java project directory structure.
 * @param path the root of the project. Optional,defaults to user.dir.
 */
 void createBaseCore(String path = System.getProperty('user.dir'), String packageName, String gameClass) {
@@ -39,6 +39,11 @@ void createBaseCore(String path = System.getProperty('user.dir'), String package
             'libs' {}
     }
 }
+
+/**
+* Creates the basic Android project directory structure.
+* @param path the root of the project. Optional,defaults to user.dir.
+*/
 void createBaseAndroid(String path = System.getProperty('user.dir'), String packageName, String gameClass) {
     String packageNamePath = packageName.replaceAll("\\.", "/")
     ProjectTemplate.fromRoot(path) {
@@ -53,6 +58,11 @@ void createBaseAndroid(String path = System.getProperty('user.dir'), String pack
             'res' {}
     }
 }
+
+/**
+* Creates the Desktop Java project directory structure.
+* @param path the root of the project. Optional,defaults to user.dir.
+*/
 void createBaseDesktop(String path = System.getProperty('user.dir'), String packageName, String gameClass) {
     String packageNamePath = packageName.replaceAll("\\.", "/")
     ProjectTemplate.fromRoot(path) {
@@ -69,6 +79,7 @@ void createBaseDesktop(String path = System.getProperty('user.dir'), String pack
             }
     }
 }
+
 task ('createGdxJava', description: 'Creates a new Gradle libGDX(Java) project in a new directory named after your project.') << {
     String projectName = TemplatesPlugin.prompt('Project Name:')
     String outPath= "out/"
@@ -118,7 +129,6 @@ task ('createGdxJava', description: 'Creates a new Gradle libGDX(Java) project i
             into outPath + projectName + '/android'
             include 'ic_launcher-web.png'
         }
-        println '>>> Copying android resources...'
         copy {
             from 'tmpl/base/android/res'
             into outPath + projectName + '/android/res'
@@ -127,11 +137,13 @@ task ('createGdxJava', description: 'Creates a new Gradle libGDX(Java) project i
             from 'tmpl/base/android/assets'
             into outPath + projectName + '/android/assets'
         }
+
         println '>>> Copying gradle wrapper files'
         copy {
             from 'gradle-wrapper'
             into outPath + projectName
         }
+        
         println '>>> Copying gitignore'
         copy {
             from 'extras'
