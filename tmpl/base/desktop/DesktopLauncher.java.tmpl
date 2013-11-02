@@ -1,0 +1,15 @@
+package ${classPackage};
+
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+
+/**
+* @author ${System.getProperty("user.name")}
+* Created: ${new Date()}
+*/
+public class DesktopLauncher {
+        public static void main (String[] arg) {
+                LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+                new LwjglApplication(new ${gameClass}(), config);
+        }
+}

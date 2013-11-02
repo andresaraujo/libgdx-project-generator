@@ -1,0 +1,145 @@
+buildscript {
+    repositories {
+        ivy {
+            name = 'gradle_templates'
+            artifactPattern 'http://tellurianring.com/projects/gradle-plugins/[module]/[revision]/[artifact]-[revision].[ext]'
+            ivyPattern 'http://tellurianring.com/projects/gradle-plugins/[module]/[revision]/[artifact]-[revision].[ext]'
+        }
+    }
+    dependencies {
+        classpath 'gradle-templates:gradle-templates:1.3'
+    }
+}
+
+import templates.*
+
+/**
+* Creates the basic Java project directory structure.
+* @param path the root of the project. Optional,defaults to user.dir.
+*/
+void createBaseCore(String path = System.getProperty('user.dir'), String packageName, String gameClass) {
+    String packageNamePath = packageName.replaceAll("\\.", "/")
+    ProjectTemplate.fromRoot(path) {
+            'src' {
+                    'main' {
+                            'java' {
+                                "$packageNamePath" {
+                                    "${gameClass}.java" template: './tmpl/base/core/Game.java.tmpl',
+                                        classPackage: packageName,
+                                        gameClass: gameClass
+                                }
+                            }
+                            'resources' {}
+                    }
+                    'test' {
+                            'java' {}
+                            'resources' {}
+                    }
+            }
+            'libs' {}
+    }
+}
+void createBaseAndroid(String path = System.getProperty('user.dir'), String packageName, String gameClass) {
+    String packageNamePath = packageName.replaceAll("\\.", "/")
+    ProjectTemplate.fromRoot(path) {
+            'src' {
+                    "$packageNamePath" {
+                        "MainActivity.java" template: './tmpl/base/android/MainActivity.java.tmpl',
+                            classPackage: packageName,
+                            gameClass: gameClass
+                    }
+            }
+            'assets' {}
+            'res' {}
+    }
+}
+void createBaseDesktop(String path = System.getProperty('user.dir'), String packageName, String gameClass) {
+    String packageNamePath = packageName.replaceAll("\\.", "/")
+    ProjectTemplate.fromRoot(path) {
+            'src' {
+                    'main' {
+                            'java' {
+                                "$packageNamePath" {
+                                    "DesktopLauncher.java" template: './tmpl/base/desktop/DesktopLauncher.java.tmpl',
+                                        classPackage: packageName,
+                                        gameClass: gameClass
+                                }
+                            }
+                    }
+            }
+    }
+}
+task ('createGdxJava', description: 'Creates a new Gradle libGDX(Java) project in a new directory named after your project.') << {
+    String projectName = TemplatesPlugin.prompt('Project Name:')
+    String outPath= "out/"
+
+    if(projectName){
+        String projectVersion = TemplatesPlugin.prompt('Version:', '1.0')
+        String packageName = TemplatesPlugin.prompt('Package name:', 'com.example')
+        String gameClass = TemplatesPlugin.prompt('Game class:', 'MyGdxGame')
+        
+        //String packageNamePath = packageName.replaceAll("\\.", "/")
+
+        //Core project
+        createBaseCore(outPath + projectName + '/core', packageName, gameClass)
+        ProjectTemplate.fromRoot(outPath + projectName + '/core') {
+            'build.gradle' template: '/tmpl/base/core/build.gradle.tmpl'
+            'gradle.properties' content: "version=$projectVersion", append: true
+        }
+
+        //Android project
+        createBaseAndroid(outPath + projectName + '/android', packageName, gameClass)
+        ProjectTemplate.fromRoot(outPath + projectName + '/android') {
+            'build.gradle' template: '/tmpl/base/android/build.gradle.tmpl'
+            'AndroidManifest.xml' template: '/tmpl/base/android/AndroidManifest.xml .tmpl', packageName: packageName
+            'project.properties' template: '/tmpl/base/android/project.properties.tmpl'
+            'proguard-project.txt' template: '/tmpl/base/android/proguard-project.txt.tmpl'
+
+        }
+
+        //Desktop project
+        createBaseDesktop(outPath + projectName + '/desktop', packageName, gameClass)
+        ProjectTemplate.fromRoot(outPath + projectName + '/desktop') {
+            'build.gradle' template: '/tmpl/base/desktop/build.gradle.tmpl', packageName: packageName
+        }
+
+        //Base
+        ProjectTemplate.fromRoot(outPath + projectName){
+            'build.gradle' template: '/tmpl/base/build.gradle.tmpl',
+                projectVersion: projectVersion,
+                projectName: projectName 
+            'README.md' content: "###$projectName", append: true 
+            'LICENSE.txt' '// Your License Goes here' 
+        }
+
+        println '>>> Copying assets...'
+        copy {
+            from 'tmpl/base/android/'
+            into outPath + projectName + '/android'
+            include 'ic_launcher-web.png'
+        }
+        println '>>> Copying android resources...'
+        copy {
+            from 'tmpl/base/android/res'
+            into outPath + projectName + '/android/res'
+        }
+        copy {
+            from 'tmpl/base/android/assets'
+            into outPath + projectName + '/android/assets'
+        }
+        println '>>> Copying gradle wrapper files'
+        copy {
+            from 'gradle-wrapper'
+            into outPath + projectName
+        }
+        println '>>> Copying gitignore'
+        copy {
+            from 'extras'
+            into outPath + projectName
+        }
+
+    } else {
+        println 'No project name provided.'
+    }
+    
+}
