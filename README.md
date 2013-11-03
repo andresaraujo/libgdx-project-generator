@@ -1,6 +1,8 @@
 # libgdx project generator
 A tool to generate libgdx gradle based projects in two simple steps!
 
+libgdx lets you deploy a game for various backends(Android, Windows, Linux, OS-X, WebGL, iOS) more info at [http://libgdx.badlogicgames.com/](http://libgdx.badlogicgames.com/)
+
 ## Setting up a simple libgdx project
 On Linux/Mac OS X
 1. `./gradlew createGdxJava` on Linux/OSX or `gradlew createGdxJava` on windows. 
@@ -16,8 +18,8 @@ Follow the great documentation from the [libgdx-gradle-template](https://github.
 `./gradle tasks`
 
 ## To do
-- ios project template
-- more templates
-- scala templates
+- iOS project template
+- More templates
+- Scala support
 
 
