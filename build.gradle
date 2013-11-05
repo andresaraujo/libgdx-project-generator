@@ -89,8 +89,6 @@ task ('createGdxJava', description: 'Creates a new Gradle libGDX(Java) project i
         String packageName = TemplatesPlugin.prompt('Package name:', 'com.example')
         String gameClass = TemplatesPlugin.prompt('Game class:', 'MyGdxGame')
         
-        //String packageNamePath = packageName.replaceAll("\\.", "/")
-
         //Core project
         createBaseCore(outPath + projectName + '/core', packageName, gameClass)
         ProjectTemplate.fromRoot(outPath + projectName + '/core') {
