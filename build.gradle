@@ -13,6 +13,12 @@ buildscript {
 
 import templates.*
 
+String outPath= "out/"
+String projectName
+String projectVersion
+String packageName
+String gameClass
+
 /**
 * Creates the Core Java project directory structure.
 * @param path the root of the project. Optional,defaults to user.dir.
@@ -23,11 +29,7 @@ void createBaseCore(String path = System.getProperty('user.dir'), String package
             'src' {
                     'main' {
                             'java' {
-                                "$packageNamePath" {
-                                    "${gameClass}.java" template: './tmpl/base/core/Game.java.tmpl',
-                                        classPackage: packageName,
-                                        gameClass: gameClass
-                                }
+                                "$packageNamePath" {}
                             }
                             'resources' {}
                     }
@@ -80,14 +82,13 @@ void createBaseDesktop(String path = System.getProperty('user.dir'), String pack
     }
 }
 
-task ('createGdxJava', description: 'Creates a new Gradle libGDX(Java) project in a new directory named after your project.') << {
-    String projectName = TemplatesPlugin.prompt('Project Name:')
-    String outPath= "out/"
-
+task ('createBaseTemplate', description: 'Creates base directories for a libgdx java game.') << {
+    projectName = TemplatesPlugin.prompt('Project Name:')
+    
     if(projectName){
-        String projectVersion = TemplatesPlugin.prompt('Version:', '1.0')
-        String packageName = TemplatesPlugin.prompt('Package name:', 'com.example')
-        String gameClass = TemplatesPlugin.prompt('Game class:', 'MyGdxGame')
+        projectVersion = TemplatesPlugin.prompt('Version:', '1.0')
+        packageName = TemplatesPlugin.prompt('Package name:', 'com.example')
+        gameClass = TemplatesPlugin.prompt('Game class:', 'MyGdxGame')
         
         //Core project
         createBaseCore(outPath + projectName + '/core', packageName, gameClass)
@@ -121,7 +122,14 @@ task ('createGdxJava', description: 'Creates a new Gradle libGDX(Java) project i
             'LICENSE.txt' '// Your License Goes here' 
         }
 
-        println '>>> Copying assets...'
+    } else {
+        println 'No project name provided.'
+    }
+    
+}
+
+task ('copyResources', dependsOn: 'createBaseTemplate', description: 'Copy resources to the project directory') << {
+    println '>>> Copying assets...'
         copy {
             from 'tmpl/base/android/'
             into outPath + projectName + '/android'
@@ -146,10 +154,23 @@ task ('createGdxJava', description: 'Creates a new Gradle libGDX(Java) project i
         copy {
             from 'extras'
             into outPath + projectName
-        }
+        }    
+}
 
-    } else {
-        println 'No project name provided.'
+task ('createGdxEmpty', dependsOn: 'copyResources', description: 'Creates an empty Gradle libGDX(Java) project in a new directory named after your project.') << {
+    String packageNamePath = packageName.replaceAll("\\.", "/")
+    ProjectTemplate.fromRoot(outPath + projectName + '/core') {
+            'src/main/java' {
+                "$packageNamePath" {
+                    "${gameClass}.java" template: './tmpl/base/core/Game.java.tmpl',
+                        classPackage: packageName,
+                        gameClass: gameClass
+                }
+            }
     }
-    
+}
+
+task ('help', description: 'Shows help') << {
+    def other = tasks.findAll { task -> !task.name.contains('copyResources') && !task.name.contains('createBaseTemplate') }
+    other.each() { println " ${it.getName()} - ${it.description}" };
 }
