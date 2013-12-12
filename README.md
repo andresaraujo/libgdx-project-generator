@@ -1,3 +1,5 @@
+[![Stories in Ready](https://badge.waffle.io/andresaraujo/libgdx-project-generator.png?label=ready)](http://waffle.io/andresaraujo/libgdx-project-generator)
+
 # libgdx project generator
 A tool to generate libgdx gradle based projects in two simple steps!
 
